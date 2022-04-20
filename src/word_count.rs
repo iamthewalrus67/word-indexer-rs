@@ -32,11 +32,11 @@ pub fn compatibility_case_fold(s: &str) -> String {
 }
 
 pub fn index_files_from_deque(
-    mt_d_file_contents: &MtDeque<Option<(String, String)>>,
+    mt_d_file_contents: &MtDeque<Option<String>>,
     global_map: &Mutex<HashMap<String, usize>>,
 ) {
     loop {
-        let (file_contents, ext) = match mt_d_file_contents.pop_front() {
+        let file_contents = match mt_d_file_contents.pop_front() {
             Some(v) => v,
             None => {
                 mt_d_file_contents.push_back(None);
@@ -44,9 +44,7 @@ pub fn index_files_from_deque(
             }
         };
 
-        if ext == "txt" {
-            count_words(&file_contents, global_map)
-        }
+        count_words(&file_contents, global_map)
     }
 }
 
@@ -61,16 +59,13 @@ fn write_sorted_map_to_file(
     // TODO: Better error handling
     let mut file = std::fs::File::create(path).unwrap();
     for (k, v) in sorted_map {
-        writeln!(&mut file, "{}: {}", k, v)?;
+        writeln!(&mut file, "{} {}", k, v)?;
     }
 
     Ok(())
 }
 
-pub fn write_map_sorted_by_value(
-    global_map: &HashMap<String, usize>,
-    path: &str,
-) -> Result<(), Box<dyn std::error::Error>> {
+pub fn write_map_sorted_by_value(global_map: &HashMap<String, usize>, path: &str) -> Result<(), Box<dyn std::error::Error>> {
     write_sorted_map_to_file(global_map, path, |word1, word2| {
         if word1.1 != word2.1 {
             return word2.1.cmp(word1.1);
@@ -82,10 +77,7 @@ pub fn write_map_sorted_by_value(
     Ok(())
 }
 
-pub fn write_map_sorted_by_key(
-    global_map: &HashMap<String, usize>,
-    path: &str,
-) -> Result<(), Box<dyn std::error::Error>> {
+pub fn write_map_sorted_by_key(global_map: &HashMap<String, usize>, path: &str) -> Result<(), Box<dyn std::error::Error>> {
     write_sorted_map_to_file(global_map, path, |word1, word2| {
         return word1.0.cmp(word2.0);
     })?;
