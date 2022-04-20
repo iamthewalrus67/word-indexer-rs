@@ -6,7 +6,7 @@ use unicode_segmentation::UnicodeSegmentation;
 
 use crate::mt::MtDeque;
 
-pub fn count_words(contents: &str, global_map: &Mutex<HashMap<String, usize>>) {
+pub fn count_words(contents: &str, mt_d_indexes: &MtDeque<Option<HashMap<String, usize>>>) {
     let mut local_map = HashMap::<String, usize>::new();
 
     for word in contents.unicode_words() {
@@ -15,10 +15,7 @@ pub fn count_words(contents: &str, global_map: &Mutex<HashMap<String, usize>>) {
         *local_map.entry(norm_word).or_insert(0) += 1;
     }
 
-    let mut guard = global_map.lock().unwrap();
-    for (key, value) in local_map.into_iter() {
-        *guard.entry(key).or_insert(0) += value;
-    }
+    mt_d_indexes.push_back(Some(local_map));
 }
 
 pub fn compatibility_case_fold(s: &str) -> String {
@@ -33,7 +30,8 @@ pub fn compatibility_case_fold(s: &str) -> String {
 
 pub fn index_files_from_deque(
     mt_d_file_contents: &MtDeque<Option<String>>,
-    global_map: &Mutex<HashMap<String, usize>>,
+    // global_map: &Mutex<HashMap<String, usize>>,
+    mt_d_indexes: &MtDeque<Option<HashMap<String, usize>>>
 ) {
     loop {
         let file_contents = match mt_d_file_contents.pop_front() {
@@ -44,8 +42,10 @@ pub fn index_files_from_deque(
             }
         };
 
-        count_words(&file_contents, global_map)
+        count_words(&file_contents, mt_d_indexes);
     }
+
+    mt_d_indexes.push_back(None);
 }
 
 fn write_sorted_map_to_file(

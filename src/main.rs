@@ -3,6 +3,7 @@ mod list_and_read;
 mod mt;
 mod parsing;
 mod word_count;
+mod parallel_merge;
 
 use std::collections::HashMap;
 use std::env;
