@@ -1,6 +1,6 @@
 use std::{collections::HashMap, sync::Mutex, cmp::Ordering, io::Write, fmt::format, fs::OpenOptions};
 
-use unicode_segmentation::UnicodeSegmentation;
+use unicode_segmentation::{UnicodeWords, UnicodeSegmentation};
 use unicode_normalization::UnicodeNormalization;
 use caseless::Caseless;
 
@@ -9,8 +9,10 @@ use crate::mt::MtDeque;
 pub fn count_words(contents: &str, global_map: &Mutex<HashMap<String, usize>>) {
     let mut local_map = HashMap::<String, usize>::new();
 
-    for word in contents.split_word_bounds() {
-        *local_map.entry(compatibility_case_fold(word)).or_insert(0) += 1;
+    for word in contents.unicode_words() {
+        let norm_word = compatibility_case_fold(word);
+
+        *local_map.entry(norm_word).or_insert(0) += 1;
     }
 
     let mut guard = global_map.lock().unwrap();
