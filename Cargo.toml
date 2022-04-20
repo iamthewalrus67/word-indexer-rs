@@ -1,5 +1,5 @@
 [package]
-name = "rust_datarace"
+name = "word_indexer_rs"
 version = "0.1.0"
 edition = "2021"
 
