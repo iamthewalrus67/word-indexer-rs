@@ -60,7 +60,7 @@ fn write_sorted_map_to_file(global_map: &HashMap<String, usize>,
 pub fn write_map_sorted_by_value(global_map: &HashMap<String, usize>, path: &str) {
     write_sorted_map_to_file(global_map, path, |word1, word2| { 
         if (word1.1 != word2.1) {
-            return word1.1.cmp(word2.1);
+            return word2.1.cmp(word1.1);
         } else {
             return word1.0.cmp(word2.0);
         }

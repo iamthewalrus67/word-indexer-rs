@@ -19,32 +19,49 @@ use crate::list_and_read::{add_files_to_deque, read_files_from_deque};
 use crate::word_count::compatibility_case_fold;
 
 fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // let args: Vec<String> = env::args().collect();
-    // if args.len() != 2 {
-    //     eprintln!("Error: Wrong argument count");
-    //     // TODO: Create enum of error codes
-    //     exit(1);
-    // }
+    let args: Vec<String> = env::args().collect();
+    let conf_path;
+    if args.len() != 2 {
+        conf_path = "index.cfg";
+    } else {
+        conf_path = &args[1];
+    }
 
-    // let config = parsing::parse_config(&args[1])?;
+    let config = parsing::parse_config(conf_path)?;
 
-    let config = parsing::parse_config("index.cfg")?;
     let mt_d_filenames = Arc::new(MtDeque::new());
     let mt_d_file_contents = Arc::new(MtDeque::new());
+    let mut global_map = Arc::new(Mutex::new(HashMap::<String, usize>::new()));
 
-    let mt_d_filenames_arc_clone = Arc::clone(&mt_d_filenames);
-    let mt_d_file_contents_arc_clone = Arc::clone(&mt_d_file_contents);
+    let mut threads = vec![];
 
-    let list_thread = thread::spawn(move || { add_files_to_deque(&mt_d_filenames_arc_clone, &config.indir) });
+    // Create list thread
+    {
+        let mt_d_filenames = Arc::clone(&mt_d_filenames);
+        let list_thread = thread::spawn(move || { add_files_to_deque(&Arc::clone(&mt_d_filenames), &config.indir) });
+        threads.push(list_thread);
+    }
 
-    let read_thread = thread::spawn(move || { read_files_from_deque(&mt_d_filenames, &mt_d_file_contents_arc_clone) });
-    
+    // Create read thread
+    {
+        let mt_d_filenames = Arc::clone(&mt_d_filenames);
+        let mt_d_file_contents = Arc::clone(&mt_d_file_contents);
+        let read_thread = thread::spawn(move || { read_files_from_deque(&Arc::clone(&mt_d_filenames), &Arc::clone(&mt_d_file_contents)) });
+        threads.push(read_thread);
+    }
 
-    list_thread.join();
-    read_thread.join();
+    // Create index threads
+    {
+        for _ in 0..config.indexing_threads {
+            let mt_d_file_contents = Arc::clone(&mt_d_file_contents);
+            let mut global_map = Arc::clone(&global_map);
+            threads.push(thread::spawn(move || index_files_from_deque(&mt_d_file_contents, &mut global_map)));
+        }
+    }
 
-    let mut global_map = Mutex::new(HashMap::<String, usize>::new());
-    index_files_from_deque(&mt_d_file_contents, &mut global_map);
+    for thread in threads {
+        thread.join();
+    }
 
     write_map_sorted_by_key(&global_map.lock().unwrap(), &config.out_by_a);
     write_map_sorted_by_value(&global_map.lock().unwrap(), &config.out_by_n);

@@ -8,6 +8,6 @@ pub fn unzip_from_memory(path: &str) {
             Err(_) => continue,
         };
 
-        // zip_file.read
+        println!("{:?}", zip_file.name());
     }
 }
