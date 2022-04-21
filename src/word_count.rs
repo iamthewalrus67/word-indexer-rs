@@ -1,4 +1,4 @@
-use std::{cmp::Ordering, collections::HashMap, io::Write, sync::Mutex};
+use std::{cmp::Ordering, collections::HashMap, io::Write};
 
 use caseless::Caseless;
 use unicode_normalization::UnicodeNormalization;
@@ -30,7 +30,6 @@ pub fn compatibility_case_fold(s: &str) -> String {
 
 pub fn index_files_from_deque(
     mt_d_file_contents: &MtDeque<Option<String>>,
-    // global_map: &Mutex<HashMap<String, usize>>,
     mt_d_indexes: &MtDeque<Option<HashMap<String, usize>>>
 ) {
     loop {
@@ -45,7 +44,7 @@ pub fn index_files_from_deque(
         count_words(&file_contents, mt_d_indexes);
     }
 
-    mt_d_indexes.push_back(None);
+    // mt_d_indexes.push_back(None);
 }
 
 fn write_sorted_map_to_file(

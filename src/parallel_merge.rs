@@ -1,8 +1,9 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::atomic::{AtomicU64, AtomicI64}};
 
-use word_indexer_rs::mt::MtDeque;
+use crate::mt::MtDeque;
 
-pub fn merge(mt_d_indexes: MtDeque<Option<HashMap<String, usize>>>) {
+
+pub fn merge(mt_d_indexes: &MtDeque<Option<HashMap<String, usize>>>) {
     loop {
         let mut map1 = match mt_d_indexes.pop_front() {
             Some(v) => v,
@@ -11,15 +12,22 @@ pub fn merge(mt_d_indexes: MtDeque<Option<HashMap<String, usize>>>) {
                 break;
             },
         };
-
-        let mut map2 = mt_d_indexes.pop_front().unwrap();
+    
+        let mut map2 = match mt_d_indexes.pop_front() {
+            Some(v) => v,
+            None => {
+                mt_d_indexes.push_back(Some(map1));
+                mt_d_indexes.push_back(None);
+                break;
+            }
+        };
 
         if map1.keys().len() < map2.keys().len() {
             merge_into_first(&mut map2, &mut map1);
-            mt_d_indexes.push_back(Some(map2));
+            mt_d_indexes.push_front(Some(map2));
         } else {
             merge_into_first(&mut map1, &mut map2);
-            mt_d_indexes.push_back(Some(map1));
+            mt_d_indexes.push_front(Some(map1));
         }
     }
 }

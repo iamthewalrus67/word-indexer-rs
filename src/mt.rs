@@ -1,4 +1,5 @@
 use std::collections::VecDeque;
+use std::fmt::Debug;
 use std::sync::{Condvar, Mutex};
 
 use self::size_limits::DEQUE_SIZE_LIMIT_BYTES;
@@ -74,4 +75,52 @@ impl<T> MtDeque<T> {
         self.cv_full.notify_one();
         return popped_elem;
     }
+
+    pub fn size(&self) -> usize {
+        return self.deque.lock().unwrap().len();
+    }
 }
+
+
+// pub struct MtPairQueue<T> {
+//     pair: Mutex<(T, T)>,
+//     deque: Mutex<VecDeque<(T, T)>>,
+//     cv_new_pair: Condvar,
+// }
+
+// unsafe impl<T> Sync for MtPairQueue<T> {}
+// unsafe impl<T> Send for MtPairQueue<T> {}
+
+
+// impl<T> MtPairQueue<T> {
+//     pub fn push(&self, elem: T) {
+//         let mut pair_guard = self.pair.lock().unwrap();
+//         if pair_guard.0 {
+//             pair_guard.0 = elem;
+//         } else {
+//             pair_guard.1 = Some(elem);
+//             {
+//                 let mut deque_guard = self.deque.lock().unwrap();
+//                 deque_guard.push_back((pair_guard.0.unwrap(), pair_guard.1.unwrap()));
+//             }
+//             pair_guard.0 = None;
+//             pair_guard.1 = None;
+//             self.cv_new_pair.notify_one();
+//         }
+//     }
+
+//     pub fn pop_pair(&self) -> (T, T) {
+//         let mut deque_guard= self.deque.lock().unwrap();
+//         self.cv_new_pair.wait_while(deque_guard, |deque| {
+//             deque.is_empty()
+//         });
+
+//         let popped_pair = deque_guard.pop_front().unwrap();
+//         return popped_pair;
+//     }
+
+//     pub fn get_result(&self) -> T {
+//         let a = self.pair.lock().unwrap().0.unwrap();
+//         return a;
+//     }
+// }

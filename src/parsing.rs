@@ -5,15 +5,17 @@ use configparser::ini::Ini;
 #[derive(Debug)]
 pub struct Config {
     pub indexing_threads: u64,
+    pub merging_threads: u64,
     pub indir: String,
     pub out_by_a: String,
     pub out_by_n: String,
 }
 
 impl Config {
-    pub fn new(indexing_threads: u64, indir: &str, out_by_a: &str, out_by_n: &str) -> Self {
+    pub fn new(indexing_threads: u64, merging_threads: u64, indir: &str, out_by_a: &str, out_by_n: &str) -> Self {
         Self {
             indexing_threads: indexing_threads,
+            merging_threads: merging_threads,
             indir: indir.replace(&['\'', '\"'][..], ""),
             out_by_a: out_by_a.replace(&['\'', '\"'][..], ""),
             out_by_n: out_by_n.replace(&['\'', '\"'][..], ""),
@@ -45,6 +47,14 @@ pub fn parse_config(path: &str) -> Result<Config, Box<dyn Error>> {
         _ => return Err(Box::new(ConfigParseError {})),
     };
 
+    let merging_threads = match ini.getuint("default", "merging_threads") {
+        Ok(merging_threads) => match merging_threads {
+            Some(v) => v,
+            None => return Err(Box::new(ConfigParseError {})),
+        },
+        _ => return Err(Box::new(ConfigParseError {})),
+    };
+
     let indir = match ini.get("default", "indir") {
         Some(v) => v,
         None => return Err(Box::new(ConfigParseError {})),
@@ -60,7 +70,7 @@ pub fn parse_config(path: &str) -> Result<Config, Box<dyn Error>> {
         None => return Err(Box::new(ConfigParseError {})),
     };
 
-    let config = Config::new(indexing_threads, &indir, &out_by_a, &out_by_n);
+    let config = Config::new(indexing_threads, merging_threads, &indir, &out_by_a, &out_by_n);
 
     return Ok(config);
 }
