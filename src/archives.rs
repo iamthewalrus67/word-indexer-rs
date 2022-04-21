@@ -26,16 +26,27 @@ pub fn unzip_from_memory(path: &str, mt_d_file_contents: &MtDeque<Option<String>
                 continue;
             }
 
+            if zip_file.size() >= FILE_SIZE_LIMIT_BYTES as u64{
+                continue;
+            }
+
             if zip_file.is_file() && Path::new(zip_file.name()).extension().unwrap() == "zip" {
                 let mut buf = vec![];
-                zip_file.read_to_end(&mut buf);
+                match zip_file.read_to_end(&mut buf) {
+                    Ok(_) => (),
+                    Err(_) => continue
+                };
                 zip_archives_deque.push_back(ZipArchive::new(Cursor::new(buf)).unwrap());
                 continue;
             }
 
-            let mut buf = String::new();
-            zip_file.read_to_string(&mut buf);
-            mt_d_file_contents.push_back(Some(buf));
+            let mut buf = vec![];
+            match zip_file.read_to_end(&mut buf) {
+                Ok(_) => (),
+                Err(_) => continue
+            };
+
+            mt_d_file_contents.push_back(Some(String::from_utf8_lossy(&buf).to_string()));
         }
     }
 }

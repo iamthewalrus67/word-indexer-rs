@@ -17,6 +17,10 @@ pub fn read_files_from_deque(
             }
         };
 
+        if file_path.is_dir() {
+            continue;
+        }
+
         let file_ext: String = match file_path.extension() {
             Some(v) => match v.to_str() {
                 Some(s) => s.to_string(),
@@ -43,11 +47,12 @@ pub fn read_files_from_deque(
             continue;
         }
 
-        let mut file_contents_string = String::new();
-        match file.read_to_string(&mut file_contents_string) {
+        let mut file_contents = vec![];
+        match file.read_to_end(&mut file_contents) {
             Ok(_) => (),
             Err(_) => continue,
         };
+        let file_contents_string = String::from_utf8_lossy(&file_contents).to_string();
 
         if !file_contents_string.is_empty() {
             mt_d_file_contents.push_front(Some(file_contents_string))

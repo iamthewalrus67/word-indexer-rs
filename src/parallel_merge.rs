@@ -1,4 +1,4 @@
-use std::{collections::HashMap, sync::atomic::{AtomicU64, AtomicI64}};
+use std::collections::HashMap;
 
 use crate::mt::MtDeque;
 
@@ -12,7 +12,7 @@ pub fn merge(mt_d_indexes: &MtDeque<Option<HashMap<String, usize>>>) {
                 break;
             },
         };
-    
+
         let mut map2 = match mt_d_indexes.pop_front() {
             Some(v) => v,
             None => {

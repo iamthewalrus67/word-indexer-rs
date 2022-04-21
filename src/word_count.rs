@@ -48,11 +48,11 @@ pub fn index_files_from_deque(
 }
 
 fn write_sorted_map_to_file(
-    global_map: &HashMap<String, usize>,
+    map: &HashMap<String, usize>,
     path: &str,
     f: fn(&(&String, &usize), &(&String, &usize)) -> Ordering,
 ) -> Result<(), Box<dyn std::error::Error>> {
-    let mut sorted_map = global_map.into_iter().collect::<Vec<(&String, &usize)>>();
+    let mut sorted_map = map.into_iter().collect::<Vec<(&String, &usize)>>();
     sorted_map.sort_by(|word1, word2| f(word1, word2));
 
     // TODO: Better error handling
@@ -64,8 +64,8 @@ fn write_sorted_map_to_file(
     Ok(())
 }
 
-pub fn write_map_sorted_by_value(global_map: &HashMap<String, usize>, path: &str) -> Result<(), Box<dyn std::error::Error>> {
-    write_sorted_map_to_file(global_map, path, |word1, word2| {
+pub fn write_map_sorted_by_value(map: &HashMap<String, usize>, path: &str) -> Result<(), Box<dyn std::error::Error>> {
+    write_sorted_map_to_file(map, path, |word1, word2| {
         if word1.1 != word2.1 {
             return word2.1.cmp(word1.1);
         } else {
@@ -76,8 +76,8 @@ pub fn write_map_sorted_by_value(global_map: &HashMap<String, usize>, path: &str
     Ok(())
 }
 
-pub fn write_map_sorted_by_key(global_map: &HashMap<String, usize>, path: &str) -> Result<(), Box<dyn std::error::Error>> {
-    write_sorted_map_to_file(global_map, path, |word1, word2| {
+pub fn write_map_sorted_by_key(map: &HashMap<String, usize>, path: &str) -> Result<(), Box<dyn std::error::Error>> {
+    write_sorted_map_to_file(map, path, |word1, word2| {
         return word1.0.cmp(word2.0);
     })?;
 
