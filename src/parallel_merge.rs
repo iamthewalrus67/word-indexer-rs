@@ -32,7 +32,7 @@ pub fn merge(mt_d_indexes: &MtDeque<Option<HashMap<String, usize>>>) {
     }
 }
 
-fn merge_into_first(map1: &mut HashMap<String, usize>, map2: &mut HashMap<String, usize>) {
+pub fn merge_into_first(map1: &mut HashMap<String, usize>, map2: &mut HashMap<String, usize>) {
     for (k, v) in map2 {
         *map1.entry(k.to_string()).or_insert(0) += *v;
     }

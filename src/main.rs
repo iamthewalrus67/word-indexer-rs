@@ -83,10 +83,14 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         thread.join().unwrap();
     }
 
-    let global_map = mt_d_indexes.pop_front().unwrap();
+    let mut map = mt_d_indexes.pop_front().unwrap();
+    if mt_d_indexes.size() > 1 {
+        let mut kostyl_map = mt_d_indexes.pop_front().unwrap();
+        parallel_merge::merge_into_first(&mut map, &mut kostyl_map)
+    }
 
-    write_map_sorted_by_key(&global_map, &config.out_by_a)?;
-    write_map_sorted_by_value(&global_map, &config.out_by_n)?;
+    write_map_sorted_by_key(&map, &config.out_by_a)?;
+    write_map_sorted_by_value(&map, &config.out_by_n)?;
 
     Ok(())
 }
