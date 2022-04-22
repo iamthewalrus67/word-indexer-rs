@@ -18,7 +18,7 @@ pub fn read_files_from_deque(
     mt_d_file_contents: &MtDeque<Option<String>>,
 ) {
     loop {
-        println!("{:?}", mt_d_filenames.size());
+        // println!("{:?}", mt_d_filenames.size());
         let file_for_index = match mt_d_filenames.pop_front() {
             Some(v) => v,
             // Poison pill for mt_d_filenames

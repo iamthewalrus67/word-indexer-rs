@@ -50,6 +50,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
                 
             });
         threads.push(list_thread);
+        // list_thread.join().unwrap();
     }
 
     // Create read thread
@@ -66,6 +67,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
             let mut file_contents_duration_guard = file_contents_duration.lock().unwrap();
             *file_contents_duration_guard += instant.elapsed();
         });
+        // read_thread.join();
         threads.push(read_thread);
     }
 
