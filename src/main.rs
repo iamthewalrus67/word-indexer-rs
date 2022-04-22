@@ -5,9 +5,10 @@ mod parsing;
 mod word_count;
 mod parallel_merge;
 
-use std::env;
+use std::{env, sync::Mutex};
 use std::sync::Arc;
 use std::thread;
+use std::time::{Instant, Duration};
 
 use mt::MtDeque;
 use parallel_merge::merge;
@@ -26,6 +27,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let config = parsing::parse_config(conf_path)?;
 
+    let whole_instant = Instant::now();
+    let filenames_duration = Arc::new(Mutex::new(Duration::new(0, 0)));
+    let file_contents_duration = Arc::new(Mutex::new(Duration::new(0, 0)));
+
     let mt_d_filenames = Arc::new(MtDeque::new());
     let mt_d_file_contents = Arc::new(MtDeque::new());
     let mt_d_indexes = Arc::new(MtDeque::new());
@@ -35,8 +40,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     // Create list thread
     {
         let mt_d_filenames = Arc::clone(&mt_d_filenames);
+        let filenames_duration = Arc::clone(&filenames_duration);
         let list_thread =
-            thread::spawn(move || add_files_to_deque(&mt_d_filenames, &config.indir));
+            thread::spawn(move || { 
+                let instant = Instant::now();
+                add_files_to_deque(&mt_d_filenames, &config.indir);
+                let mut file_contents_duration_guard = filenames_duration.lock().unwrap();
+                *file_contents_duration_guard += instant.elapsed();
+                
+            });
         threads.push(list_thread);
     }
 
@@ -44,11 +56,15 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let mt_d_filenames = Arc::clone(&mt_d_filenames);
         let mt_d_file_contents = Arc::clone(&mt_d_file_contents);
+        let file_contents_duration = Arc::clone(&file_contents_duration);
         let read_thread = thread::spawn(move || {
+            let instant = Instant::now();
             read_files_from_deque(
                 &mt_d_filenames,
                 &mt_d_file_contents,
-            )
+            );
+            let mut file_contents_duration_guard = file_contents_duration.lock().unwrap();
+            *file_contents_duration_guard += instant.elapsed();
         });
         threads.push(read_thread);
     }
@@ -85,12 +101,21 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let mut map = mt_d_indexes.pop_front().unwrap();
     if mt_d_indexes.size() > 1 {
-        let mut kostyl_map = mt_d_indexes.pop_front().unwrap();
-        parallel_merge::merge_into_first(&mut map, &mut kostyl_map)
+        let kostyl_map = mt_d_indexes.pop_front().unwrap();
+        parallel_merge::merge_into_first(&mut map, &kostyl_map)
     }
 
+    let whole_duration = whole_instant.elapsed();
+
+    let write_instant = Instant::now();
     write_map_sorted_by_key(&map, &config.out_by_a)?;
     write_map_sorted_by_value(&map, &config.out_by_n)?;
+    let write_duration = write_instant.elapsed();
+
+    println!("Total={}", whole_duration.as_millis());
+    println!("Reading={}", file_contents_duration.lock().unwrap().as_millis());
+    println!("Finding={}", filenames_duration.lock().unwrap().as_millis());
+    println!("Writing={}", write_duration.as_millis());
 
     Ok(())
 }
