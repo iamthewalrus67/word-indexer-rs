@@ -1,14 +1,14 @@
 mod archives;
 mod list_and_read;
 mod mt;
+mod parallel_merge;
 mod parsing;
 mod word_count;
-mod parallel_merge;
 
-use std::{env, sync::Mutex};
 use std::sync::Arc;
 use std::thread;
-use std::time::{Instant, Duration};
+use std::time::{Duration, Instant};
+use std::{env, sync::Mutex};
 
 use mt::MtDeque;
 use parallel_merge::merge;
@@ -41,14 +41,12 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     {
         let mt_d_filenames = Arc::clone(&mt_d_filenames);
         let filenames_duration = Arc::clone(&filenames_duration);
-        let list_thread =
-            thread::spawn(move || { 
-                let instant = Instant::now();
-                add_files_to_deque(&mt_d_filenames, &config.indir);
-                let mut file_contents_duration_guard = filenames_duration.lock().unwrap();
-                *file_contents_duration_guard += instant.elapsed();
-                
-            });
+        let list_thread = thread::spawn(move || {
+            let instant = Instant::now();
+            add_files_to_deque(&mt_d_filenames, &config.indir);
+            let mut file_contents_duration_guard = filenames_duration.lock().unwrap();
+            *file_contents_duration_guard += instant.elapsed();
+        });
         threads.push(list_thread);
     }
 
@@ -59,10 +57,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         let file_contents_duration = Arc::clone(&file_contents_duration);
         let read_thread = thread::spawn(move || {
             let instant = Instant::now();
-            read_files_from_deque(
-                &mt_d_filenames,
-                &mt_d_file_contents,
-            );
+            read_files_from_deque(&mt_d_filenames, &mt_d_file_contents);
             let mut file_contents_duration_guard = file_contents_duration.lock().unwrap();
             *file_contents_duration_guard += instant.elapsed();
         });
@@ -99,11 +94,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         thread.join().unwrap();
     }
 
-    let mut map = mt_d_indexes.pop_front().unwrap();
-    while mt_d_indexes.len() > 1 {
-        let kostyl_map = mt_d_indexes.pop_front().unwrap();
-        parallel_merge::merge_into_first(&mut map, &kostyl_map)
-    }
+    let map = mt_d_indexes.pop_front().unwrap();
 
     let whole_duration = whole_instant.elapsed();
 

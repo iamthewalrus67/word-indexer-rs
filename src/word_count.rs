@@ -30,7 +30,7 @@ pub fn compatibility_case_fold(s: &str) -> String {
 
 pub fn index_files_from_deque(
     mt_d_file_contents: &MtDeque<Option<String>>,
-    mt_d_indexes: &MtDeque<Option<HashMap<String, usize>>>
+    mt_d_indexes: &MtDeque<Option<HashMap<String, usize>>>,
 ) {
     loop {
         let file_contents = match mt_d_file_contents.pop_front() {
@@ -62,7 +62,10 @@ fn write_sorted_map_to_file(
     Ok(())
 }
 
-pub fn write_map_sorted_by_value(map: &HashMap<String, usize>, path: &str) -> Result<(), Box<dyn std::error::Error>> {
+pub fn write_map_sorted_by_value(
+    map: &HashMap<String, usize>,
+    path: &str,
+) -> Result<(), Box<dyn std::error::Error>> {
     write_sorted_map_to_file(map, path, |word1, word2| {
         if word1.1 != word2.1 {
             return word2.1.cmp(word1.1);
@@ -74,7 +77,10 @@ pub fn write_map_sorted_by_value(map: &HashMap<String, usize>, path: &str) -> Re
     Ok(())
 }
 
-pub fn write_map_sorted_by_key(map: &HashMap<String, usize>, path: &str) -> Result<(), Box<dyn std::error::Error>> {
+pub fn write_map_sorted_by_key(
+    map: &HashMap<String, usize>,
+    path: &str,
+) -> Result<(), Box<dyn std::error::Error>> {
     write_sorted_map_to_file(map, path, |word1, word2| {
         return word1.0.cmp(word2.0);
     })?;

@@ -1,5 +1,5 @@
 use std::fs;
-use std::io::{Read, Cursor};
+use std::io::{Cursor, Read};
 use std::path::PathBuf;
 
 use crate::archives::get_contents_from_zip_file;
@@ -54,7 +54,7 @@ pub fn read_files_from_deque(
                 if !file_contents_string.is_empty() {
                     mt_d_file_contents.push_front(Some(file_contents_string))
                 }
-            },
+            }
             FileForIndex::Zip(paths, zip_archive) => {
                 get_contents_from_zip_file(paths, zip_archive, mt_d_file_contents);
             }
@@ -67,9 +67,13 @@ pub fn add_files_to_deque(mt_d_filenames: &MtDeque<Option<FileForIndex>>, indir:
     use walkdir::WalkDir;
 
     for entry in WalkDir::new(indir).into_iter().filter_map(|e| e.ok()) {
-        if entry.path().is_file() && entry.path().extension().unwrap() == "zip" {
+        let entry_ext = match entry.path().extension() {
+            Some(ext) => ext,
+            None => continue,
+        };
+        if entry_ext == "zip" {
             crate::archives::get_file_names_from_zip_path(entry.path(), mt_d_filenames);
-        } else if entry.path().is_file() && entry.path().extension().unwrap() == "txt" {
+        } else if entry_ext == "txt" {
             let path = PathBuf::from(entry.path().as_os_str().to_str().unwrap());
             mt_d_filenames.push_back(Some(FileForIndex::Regular(path)));
         }

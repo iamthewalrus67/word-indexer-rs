@@ -12,7 +12,13 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new(indexing_threads: u64, merging_threads: u64, indir: &str, out_by_a: &str, out_by_n: &str) -> Self {
+    pub fn new(
+        indexing_threads: u64,
+        merging_threads: u64,
+        indir: &str,
+        out_by_a: &str,
+        out_by_n: &str,
+    ) -> Self {
         Self {
             indexing_threads: indexing_threads,
             merging_threads: merging_threads,
@@ -70,7 +76,13 @@ pub fn parse_config(path: &str) -> Result<Config, Box<dyn Error>> {
         None => return Err(Box::new(ConfigParseError {})),
     };
 
-    let config = Config::new(indexing_threads, merging_threads, &indir, &out_by_a, &out_by_n);
+    let config = Config::new(
+        indexing_threads,
+        merging_threads,
+        &indir,
+        &out_by_a,
+        &out_by_n,
+    );
 
     return Ok(config);
 }
