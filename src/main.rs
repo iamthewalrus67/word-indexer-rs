@@ -100,7 +100,7 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
     }
 
     let mut map = mt_d_indexes.pop_front().unwrap();
-    while mt_d_indexes.size() > 1 {
+    while mt_d_indexes.len() > 1 {
         let kostyl_map = mt_d_indexes.pop_front().unwrap();
         parallel_merge::merge_into_first(&mut map, &kostyl_map)
     }
