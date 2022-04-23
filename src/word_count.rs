@@ -43,8 +43,6 @@ pub fn index_files_from_deque(
 
         count_words(&file_contents, mt_d_indexes);
     }
-
-    // mt_d_indexes.push_back(None);
 }
 
 fn write_sorted_map_to_file(

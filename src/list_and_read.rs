@@ -8,8 +8,7 @@ use crate::mt::{size_limits, MtDeque};
 
 #[derive(Debug)]
 pub enum FileForIndex {
-    // Zip(String, RefCell<zip::read::ZipArchive<Cursor<Vec<u8>>>>),
-    Zip(String, RefCell<zip::read::ZipArchive<Cursor<Vec<u8>>>>),
+    Zip(Vec<String>, RefCell<zip::read::ZipArchive<Cursor<Vec<u8>>>>),
     Regular(PathBuf),
 }
 
@@ -18,7 +17,6 @@ pub fn read_files_from_deque(
     mt_d_file_contents: &MtDeque<Option<String>>,
 ) {
     loop {
-        // println!("{:?}", mt_d_filenames.size());
         let file_for_index = match mt_d_filenames.pop_front() {
             Some(v) => v,
             // Poison pill for mt_d_filenames
@@ -58,9 +56,8 @@ pub fn read_files_from_deque(
                     mt_d_file_contents.push_front(Some(file_contents_string))
                 }
             },
-            FileForIndex::Zip(path, zip_archive) => {
-                // println!("{}", path);
-                get_contents_from_zip_file(&path, zip_archive, mt_d_filenames, mt_d_file_contents);
+            FileForIndex::Zip(paths, zip_archive) => {
+                get_contents_from_zip_file(paths, zip_archive, mt_d_file_contents);
             }
         }
     }
@@ -71,7 +68,6 @@ pub fn add_files_to_deque(mt_d_filenames: &MtDeque<Option<FileForIndex>>, indir:
     use walkdir::WalkDir;
 
     for entry in WalkDir::new(indir).into_iter().filter_map(|e| e.ok()) {
-        // println!("{:?}", entry);
         if entry.path().is_file() && entry.path().extension().unwrap() == "zip" {
             crate::archives::get_file_names_from_zip_path(entry.path(), mt_d_filenames);
         } else if entry.path().is_file() && entry.path().extension().unwrap() == "txt" {
