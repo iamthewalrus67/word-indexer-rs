@@ -83,7 +83,10 @@ pub fn get_file_names_from_zip_archive(zip_archive: ZipArchive<Cursor<Vec<u8>>>,
 
 pub fn get_file_names_from_zip_path(path: &Path, mt_d_filenames: &MtDeque<Option<FileForIndex>>) {
     let buf = std::fs::read(path).unwrap();
-    let zip_archive = ZipArchive::new(Cursor::new(buf)).unwrap();
+    let zip_archive = match ZipArchive::new(Cursor::new(buf)) {
+        Ok(v) => v,
+        Err(_) => return,
+    };
     get_file_names_from_zip_archive(zip_archive, mt_d_filenames);
 }
 
