@@ -8,7 +8,7 @@ use crate::mt::{size_limits, MtDeque};
 
 #[derive(Debug)]
 pub enum FileForIndex {
-    Zip(Vec<String>, RefCell<zip::read::ZipArchive<Cursor<Vec<u8>>>>),
+    Zip(Vec<String>, zip::read::ZipArchive<Cursor<Vec<u8>>>),
     Regular(PathBuf),
 }
 
