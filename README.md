@@ -37,3 +37,8 @@ out_by_n="res_n.txt"  # Результати, посортовані за кіл
 indexing_threads=4
 merging_threads=2
 ```
+
+### Results
+
+Chart for guttenberg_2020_03_06.iso directory 5:
+![chart](img/chart.png)
