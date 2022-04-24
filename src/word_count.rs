@@ -19,7 +19,7 @@ pub fn count_words(contents: &str, mt_d_indexes: &MtDeque<Option<HashMap<String,
 }
 
 pub fn compatibility_case_fold(s: &str) -> String {
-    // TODO: This looks stupid
+    // This looks stupid, but it is the correct way to do it
     s.nfd()
         .default_case_fold()
         .nfkd()
@@ -53,7 +53,6 @@ fn write_sorted_map_to_file(
     let mut sorted_map = map.into_iter().collect::<Vec<(&String, &usize)>>();
     sorted_map.sort_by(|word1, word2| f(word1, word2));
 
-    // TODO: Better error handling
     let mut file = std::fs::File::create(path).unwrap();
     for (k, v) in sorted_map {
         writeln!(&mut file, "{} {}", k, v)?;
