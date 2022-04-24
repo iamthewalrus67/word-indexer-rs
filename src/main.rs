@@ -5,6 +5,7 @@ mod parallel_merge;
 mod parsing;
 mod word_count;
 
+use std::collections::HashMap;
 use std::sync::Arc;
 use std::thread;
 use std::time::{Duration, Instant};
@@ -94,7 +95,10 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         thread.join().unwrap();
     }
 
-    let map = mt_d_indexes.pop_front().unwrap();
+    let map = match mt_d_indexes.pop_front() {
+        Some(v) => v,
+        None => HashMap::new(),
+    };
 
     let whole_duration = whole_instant.elapsed();
 
