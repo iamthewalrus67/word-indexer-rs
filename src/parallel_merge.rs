@@ -15,7 +15,7 @@ pub fn merge(mt_d_indexes: &MtDeque<Option<HashMap<String, usize>>>) {
         let mut map2 = match mt_d_indexes.pop_front() {
             Some(v) => v,
             None => {
-                mt_d_indexes.push_back(Some(map1));
+                mt_d_indexes.push_front(Some(map1));
                 mt_d_indexes.push_back(None);
                 break;
             }

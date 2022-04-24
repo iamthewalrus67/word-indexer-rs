@@ -20,7 +20,7 @@ pub fn read_files_from_deque(
             Some(v) => v,
             // Poison pill for mt_d_filenames
             None => {
-                mt_d_filenames.push_front(None);
+                mt_d_filenames.push_back(None);
                 break;
             }
         };
@@ -60,7 +60,7 @@ pub fn read_files_from_deque(
             }
         }
     }
-    mt_d_file_contents.push_front(None);
+    mt_d_file_contents.push_back(None);
 }
 
 pub fn add_files_to_deque(mt_d_filenames: &MtDeque<Option<FileForIndex>>, indir: &str) {
@@ -75,7 +75,7 @@ pub fn add_files_to_deque(mt_d_filenames: &MtDeque<Option<FileForIndex>>, indir:
             crate::archives::get_file_names_from_zip_path(entry.path(), mt_d_filenames);
         } else if entry_ext == "txt" {
             let path = PathBuf::from(entry.path().as_os_str().to_str().unwrap());
-            mt_d_filenames.push_back(Some(FileForIndex::Regular(path)));
+            mt_d_filenames.push_front(Some(FileForIndex::Regular(path)));
         }
     }
     mt_d_filenames.push_back(None);

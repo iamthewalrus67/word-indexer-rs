@@ -30,7 +30,7 @@ pub fn get_contents_from_zip_file(
             Ok(_) => (),
             Err(_) => continue,
         };
-        mt_d_file_contents.push_back(Some(String::from_utf8_lossy(&buf).to_string()));
+        mt_d_file_contents.push_front(Some(String::from_utf8_lossy(&buf).to_string()));
     }
 }
 
@@ -90,7 +90,7 @@ pub fn get_file_names_from_zip_archive(
             zip_archive_deque.push_back(nested_zip_archive);
         }
 
-        mt_d_filenames.push_back(Some(FileForIndex::Zip(
+        mt_d_filenames.push_front(Some(FileForIndex::Zip(
             regular_file_names,
             popped_zip_archive,
         )));

@@ -15,7 +15,7 @@ pub fn count_words(contents: &str, mt_d_indexes: &MtDeque<Option<HashMap<String,
         *local_map.entry(norm_word).or_insert(0) += 1;
     }
 
-    mt_d_indexes.push_back(Some(local_map));
+    mt_d_indexes.push_front(Some(local_map));
 }
 
 pub fn compatibility_case_fold(s: &str) -> String {
