@@ -41,7 +41,9 @@ merging_threads=2
 ### Results
 
 Result Files("guttenberg_2020_03_06.iso" dir 3/):
+
 res_n.txt: https://drive.google.com/file/d/19Pouub10YKdXOzlSXAam0l4D3MTKNP3i/view?usp=sharing
+
 res_a.txt: https://drive.google.com/file/d/1xrSIDJi9Azt1Amf8W3XDL0mEUsZicBQH/view?usp=sharing
 
 Chart for guttenberg_2020_03_06.iso directory 5:
